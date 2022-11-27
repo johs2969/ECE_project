@@ -10,6 +10,18 @@ wire clk_flicker,hour_up_t,break_t;
 reg [7:0] hour,min,sec;
 integer cccnt;
 
+reg [3:0] state;
+parameter A1=4'b0000,
+          A2=4'b0001,
+          B=4'b0010,
+          C=4'b0011,
+          D=4'b0100,
+          E1=4'b0101,
+          E2=4'b0110,
+          F=4'b0111,
+          G=4'b1000,
+          H=4'b1001;
+          
 oneshot_universal #(.width(2)) uut(.clk(clk), .rst(rst), .btn({hour_up, break}), .btn_trig({hour_up_t,break_t}));
  //시간 계산 10khz기준 시간이 100배 빠르게 흐를것임. 대략 14분이면 하루가 돌게 된다.
  
@@ -210,8 +222,8 @@ begin
                     05 : {LCD_RS, LCD_RW, LCD_DATA} <= 10'b1_0_0110_0101; // e
                     06 : {LCD_RS, LCD_RW, LCD_DATA} <= 10'b1_0_0010_0000; //  
                     07 : {LCD_RS, LCD_RW, LCD_DATA} <= 10'b1_0_0011_1010; // :  
-                    06 : {LCD_RS, LCD_RW, LCD_DATA} <= 10'b1_0_0010_0000; //  
-                    08 : begin case(state) // state입력
+                    08 : {LCD_RS, LCD_RW, LCD_DATA} <= 10'b1_0_0010_0000; //  
+                    09 : begin case(state) // state입력
                            A1,A2: {LCD_RS, LCD_RW, LCD_DATA} <= 10'b1_0_0100_0001; // A
                             B: {LCD_RS, LCD_RW, LCD_DATA} <= 10'b1_0_0100_0010; // B
                             C: {LCD_RS, LCD_RW, LCD_DATA} <= 10'b1_0_0100_0011; // C
@@ -222,34 +234,34 @@ begin
                             H: {LCD_RS, LCD_RW, LCD_DATA} <= 10'b1_0_0100_1000; // H
                         endcase
                         end                  
-                    09 : {LCD_RS, LCD_RW, LCD_DATA} <= 10'b1_0_0010_0000; //
-                    10 : {LCD_RS, LCD_RW, LCD_DATA} <= 10'b1_0_0010_1000; // (                   
-                    11 :begin case(hour) //시간으로 주/야간 판단
+                    10 : {LCD_RS, LCD_RW, LCD_DATA} <= 10'b1_0_0010_0000; //
+                    11 : {LCD_RS, LCD_RW, LCD_DATA} <= 10'b1_0_0010_1000; // (                   
+                    12 :begin case(hour) //시간으로 주/야간 판단
                             8,9,10,11,12,13,14,15,16,17,18,19,20,21,22: {LCD_RS, LCD_RW, LCD_DATA} <= 10'b1_0_0010_0000; //
                             23,0,1,2,3,4,5,6,7: {LCD_RS, LCD_RW, LCD_DATA} <= 10'b1_0_0110_1110; // n
                         endcase
                         end
-                    12 :begin case(hour) //시간으로 주/야간 판단
+                    13 :begin case(hour) //시간으로 주/야간 판단
                             8,9,10,11,12,13,14,15,16,17,18,19,20,21,22: {LCD_RS, LCD_RW, LCD_DATA} <= 10'b1_0_0110_0100; // d
                             23,0,1,2,3,4,5,6,7: {LCD_RS, LCD_RW, LCD_DATA} <= 10'b1_0_0110_1001; // i
                         endcase
                         end
-                     13 :begin case(hour) //시간으로 주/야간 판단
+                     14 :begin case(hour) //시간으로 주/야간 판단
                             8,9,10,11,12,13,14,15,16,17,18,19,20,21,22: {LCD_RS, LCD_RW, LCD_DATA} <= 10'b1_0_0110_0001; // a
                             23,0,1,2,3,4,5,6,7: {LCD_RS, LCD_RW, LCD_DATA} <= 10'b1_0_0110_0111; // g
                         endcase
                         end     
-                     14 :begin case(hour) //시간으로 주/야간 판단
+                     15 :begin case(hour) //시간으로 주/야간 판단
                             8,9,10,11,12,13,14,15,16,17,18,19,20,21,22: {LCD_RS, LCD_RW, LCD_DATA} <= 10'b1_0_0111_1001; // y
                             23,0,1,2,3,4,5,6,7: {LCD_RS, LCD_RW, LCD_DATA} <= 10'b1_0_0110_1000; // h
                         endcase
                         end    
-                     15 :begin case(hour) //시간으로 주/야간 판단
+                     16 :begin case(hour) //시간으로 주/야간 판단
                             8,9,10,11,12,13,14,15,16,17,18,19,20,21,22: {LCD_RS, LCD_RW, LCD_DATA} <= 10'b1_0_0010_0000; //
                             23,0,1,2,3,4,5,6,7: {LCD_RS, LCD_RW, LCD_DATA} <= 10'b1_0_0111_0100; // t
                         endcase
                         end 
-                     16 : {LCD_RS, LCD_RW, LCD_DATA} <= 10'b1_0_0010_1001; // )                         
+                     17 : {LCD_RS, LCD_RW, LCD_DATA} <= 10'b1_0_0010_1001; // )                         
                     default : {LCD_RS, LCD_RW, LCD_DATA} <=10'b1_0_0010_0000; // 
                  endcase
               end
@@ -277,18 +289,6 @@ end
 assign clk_flicker = (cnt_1h >=4999) ? 0:1;            
 
 // state 변경 
-
-reg [3:0] state;
-parameter A1=4'b0000,
-          A2=4'b0001,
-          B=4'b0010,
-          C=4'b0011,
-          D=4'b0100,
-          E1=4'b0101,
-          E2=4'b0110,
-          F=4'b0111,
-          G=4'b1000,
-          H=4'b1001;
 
 integer cnt;
 reg [31:0] hold_t=0;

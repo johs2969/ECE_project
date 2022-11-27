@@ -8,8 +8,8 @@ input [width-1:0] btn;
 reg [width-1:0] btn_reg;
 output reg [width-1:0] btn_trig;
 
-always @(negedge rst or posedge clk) begin
-    if(!rst) begin
+always @(posedge rst or posedge clk) begin
+    if(rst) begin
         btn_reg <= {width{1'b0}};
         btn_trig <=  {width{1'b0}};
     end

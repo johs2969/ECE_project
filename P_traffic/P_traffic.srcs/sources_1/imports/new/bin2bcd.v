@@ -6,8 +6,8 @@ input clk,rst;
 input [7:0] bin;
 output reg [7:0] bcd;
 
-always @(negedge rst or posedge clk) begin
-    if(!rst) begin
+always @(posedge rst or posedge clk) begin
+    if(rst) begin
     bcd <= {4'd0, 4'd0};
     end
     else begin
