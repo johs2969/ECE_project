@@ -40,7 +40,7 @@ always @(posedge clk or posedge rst) begin
 end
 
 //text LCD
-wire [11:0] bcd1,bcd2,bcd3;
+wire [7:0] bcd1,bcd2,bcd3;
 
 bin2bcd b1 (.clk(clk), .rst(rst), .bin(hour), .bcd(bcd1));
 bin2bcd b11 (.clk(clk), .rst(rst), .bin(min), .bcd(bcd2));
