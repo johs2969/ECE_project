@@ -1,16 +1,16 @@
 `timescale 1ns / 1ps
 //10khz 기준
-module traffic(rst, clk, hour_up, led_red, led_yellow, led_green, led_left, led_walk_red, led_walk_green,LCD_E,LCD_RS,LCD_RW,LCD_DATA );
+module traffic(rst, clk, hour_up, break, led_red, led_yellow, led_green, led_left, led_walk_red, led_walk_green,LCD_E,LCD_RS,LCD_RW,LCD_DATA );
 
-input clk,rst,hour_up;
+input clk,rst,hour_up,break;
 output reg [3:0] led_red, led_yellow, led_green, led_walk_red, led_walk_green, led_left;
 
 reg [13:0] cnt_1h;
-wire clk_flicker,hour_up_t;
+wire clk_flicker,hour_up_t,break_t;
 reg [7:0] hour,min,sec;
 integer cccnt;
 
-oneshot_universal #(.width(1)) uut(.clk(clk), .rst(rst), .btn(hour_up), .btn_trig(hour_up_t));
+oneshot_universal #(.width(2)) uut(.clk(clk), .rst(rst), .btn({hour_up, break}), .btn_trig({hour_up_t,break_t}));
  //시간 계산 10khz기준 시간이 100배 빠르게 흐를것임. 대략 14분이면 하루가 돌게 된다.
  
 always @(posedge clk or posedge rst) begin   
@@ -56,7 +56,8 @@ parameter DELAY2 =4'b0011,
           ENTRY_MODE =4'b0101,
           DISP_ONOFF =4'b0110,
           LINE1 =4'b0111,
-          DELAY_T =4'b1000;
+          LINE2 =4'b1000,
+          DELAY_T =4'b1001;
           
  integer ccnt;               
           
@@ -72,7 +73,7 @@ begin
         DELAY2 :begin
             if(ccnt >=700) ccnt <= 0;
             else ccnt <= ccnt+1;
-            if(ccnt == 700) state2 = FUNCTION_SET;
+            if(ccnt == 700) state2 <= FUNCTION_SET;
         end
         FUNCTION_SET :begin
             if(ccnt >=30) ccnt <= 0;
@@ -90,6 +91,11 @@ begin
             if(ccnt == 30) state2 <= LINE1;
         end
         LINE1 :begin
+            if(ccnt >=20) ccnt <= 0;
+            else ccnt <= ccnt+1;
+            if(ccnt == 20) state2 <= LINE2;
+           end
+         LINE2 :begin
             if(ccnt >=20) ccnt <= 0;
             else ccnt <= ccnt+1;
             if(ccnt == 20) state2 <= DELAY_T;
@@ -118,14 +124,21 @@ begin
                 {LCD_RS, LCD_RW, LCD_DATA} <=10'b0_0_0000_0110;   
             LINE1 : begin
                 case(ccnt)
-                    00 : {LCD_RS, LCD_RW, LCD_DATA} <=10'b0_0_1000_0000; //        
-                    01 : begin case(bcd1[7:4]) //10의 자릿수 입력 hour
+                    00 : {LCD_RS, LCD_RW, LCD_DATA} <=10'b0_0_1000_0000; //    
+                    01 : {LCD_RS, LCD_RW, LCD_DATA} <= 10'b1_0_0101_0100; // T
+                    02 : {LCD_RS, LCD_RW, LCD_DATA} <= 10'b1_0_0110_1001; // i
+                    03 : {LCD_RS, LCD_RW, LCD_DATA} <= 10'b1_0_0110_1101; // m
+                    04 : {LCD_RS, LCD_RW, LCD_DATA} <= 10'b1_0_0110_0101; // e
+                    05 : {LCD_RS, LCD_RW, LCD_DATA} <= 10'b1_0_0010_0000; // 
+                    06 : {LCD_RS, LCD_RW, LCD_DATA} <= 10'b1_0_0011_1010; // : 
+                    07 : {LCD_RS, LCD_RW, LCD_DATA} <= 10'b1_0_0010_0000; //   
+                    08 : begin case(bcd1[7:4]) //10의 자릿수 입력 hour
                             0: {LCD_RS, LCD_RW, LCD_DATA} <= 10'b1_0_0011_0000; // 0
                             1: {LCD_RS, LCD_RW, LCD_DATA} <= 10'b1_0_0011_0001; // 1
                             2: {LCD_RS, LCD_RW, LCD_DATA} <= 10'b1_0_0011_0010; // 2
                         endcase
                         end                  
-                    02 : begin case(bcd1[3:0]) //1의 자릿수 입력 hour
+                    09 : begin case(bcd1[3:0]) //1의 자릿수 입력 hour
                             0: {LCD_RS, LCD_RW, LCD_DATA} <= 10'b1_0_0011_0000; // 0
                             1: {LCD_RS, LCD_RW, LCD_DATA} <= 10'b1_0_0011_0001; // 1
                             2: {LCD_RS, LCD_RW, LCD_DATA} <= 10'b1_0_0011_0010; // 2
@@ -138,8 +151,8 @@ begin
                             9: {LCD_RS, LCD_RW, LCD_DATA} <= 10'b1_0_0011_1001; // 9
                         endcase
                         end 
-                    03 : {LCD_RS, LCD_RW, LCD_DATA} <= 10'b1_0_0011_1010; // :                    
-                    04 :begin case(bcd2[7:4]) //10의 자릿수 입력 min
+                    10 : {LCD_RS, LCD_RW, LCD_DATA} <= 10'b1_0_0011_1010; // :                    
+                    11 :begin case(bcd2[7:4]) //10의 자릿수 입력 min
                             0: {LCD_RS, LCD_RW, LCD_DATA} <= 10'b1_0_0011_0000; // 0
                             1: {LCD_RS, LCD_RW, LCD_DATA} <= 10'b1_0_0011_0001; // 1
                             2: {LCD_RS, LCD_RW, LCD_DATA} <= 10'b1_0_0011_0010; // 2
@@ -148,7 +161,7 @@ begin
                             5: {LCD_RS, LCD_RW, LCD_DATA} <= 10'b1_0_0011_0101; // 5
                         endcase
                         end
-                    05 :begin case(bcd2[3:0]) //1의 자릿수 입력 min
+                    12 :begin case(bcd2[3:0]) //1의 자릿수 입력 min
                             0: {LCD_RS, LCD_RW, LCD_DATA} <= 10'b1_0_0011_0000; // 0
                             1: {LCD_RS, LCD_RW, LCD_DATA} <= 10'b1_0_0011_0001; // 1
                             2: {LCD_RS, LCD_RW, LCD_DATA} <= 10'b1_0_0011_0010; // 2
@@ -161,8 +174,8 @@ begin
                             9: {LCD_RS, LCD_RW, LCD_DATA} <= 10'b1_0_0011_1001; // 9
                         endcase
                         end     
-                      06 : {LCD_RS, LCD_RW, LCD_DATA} <= 10'b1_0_0011_1010; // :      
-                      07 :begin case(bcd3[7:4]) //1의 자릿수 입력 sec
+                      13 : {LCD_RS, LCD_RW, LCD_DATA} <= 10'b1_0_0011_1010; // :      
+                      14 :begin case(bcd3[7:4]) //1의 자릿수 입력 sec
                             0: {LCD_RS, LCD_RW, LCD_DATA} <= 10'b1_0_0011_0000; // 0
                             1: {LCD_RS, LCD_RW, LCD_DATA} <= 10'b1_0_0011_0001; // 1
                             2: {LCD_RS, LCD_RW, LCD_DATA} <= 10'b1_0_0011_0010; // 2
@@ -171,7 +184,7 @@ begin
                             5: {LCD_RS, LCD_RW, LCD_DATA} <= 10'b1_0_0011_0101; // 5
                         endcase
                         end          
-                      08 :begin case(bcd3[3:0]) //1의 자릿수 입력 sec
+                      15 :begin case(bcd3[3:0]) //1의 자릿수 입력 sec
                             0: {LCD_RS, LCD_RW, LCD_DATA} <= 10'b1_0_0011_0000; // 0
                             1: {LCD_RS, LCD_RW, LCD_DATA} <= 10'b1_0_0011_0001; // 1
                             2: {LCD_RS, LCD_RW, LCD_DATA} <= 10'b1_0_0011_0010; // 2
@@ -184,6 +197,59 @@ begin
                             9: {LCD_RS, LCD_RW, LCD_DATA} <= 10'b1_0_0011_1001; // 9
                         endcase
                         end                            
+                    default : {LCD_RS, LCD_RW, LCD_DATA} <=10'b1_0_0010_0000; // 
+                 endcase
+              end
+               LINE2 : begin
+                case(ccnt)
+                    00 : {LCD_RS, LCD_RW, LCD_DATA} <=10'b0_0_1000_0000; //    
+                    01 : {LCD_RS, LCD_RW, LCD_DATA} <= 10'b1_0_0101_0011; // S
+                    02 : {LCD_RS, LCD_RW, LCD_DATA} <= 10'b1_0_0111_0100; // t
+                    03 : {LCD_RS, LCD_RW, LCD_DATA} <= 10'b1_0_0110_0001; // a
+                    04 : {LCD_RS, LCD_RW, LCD_DATA} <= 10'b1_0_0111_0100; // t
+                    05 : {LCD_RS, LCD_RW, LCD_DATA} <= 10'b1_0_0110_0101; // e
+                    06 : {LCD_RS, LCD_RW, LCD_DATA} <= 10'b1_0_0010_0000; //  
+                    07 : {LCD_RS, LCD_RW, LCD_DATA} <= 10'b1_0_0011_1010; // :  
+                    06 : {LCD_RS, LCD_RW, LCD_DATA} <= 10'b1_0_0010_0000; //  
+                    08 : begin case(state) // state입력
+                           A1,A2: {LCD_RS, LCD_RW, LCD_DATA} <= 10'b1_0_0100_0001; // A
+                            B: {LCD_RS, LCD_RW, LCD_DATA} <= 10'b1_0_0100_0010; // B
+                            C: {LCD_RS, LCD_RW, LCD_DATA} <= 10'b1_0_0100_0011; // C
+                            D: {LCD_RS, LCD_RW, LCD_DATA} <= 10'b1_0_0100_0100; // D
+                          E1,E2: {LCD_RS, LCD_RW, LCD_DATA} <= 10'b1_0_0100_0101; // E
+                            F: {LCD_RS, LCD_RW, LCD_DATA} <= 10'b1_0_0100_0110; // F
+                            G: {LCD_RS, LCD_RW, LCD_DATA} <= 10'b1_0_0100_0111; // G
+                            H: {LCD_RS, LCD_RW, LCD_DATA} <= 10'b1_0_0100_1000; // H
+                        endcase
+                        end                  
+                    09 : {LCD_RS, LCD_RW, LCD_DATA} <= 10'b1_0_0010_0000; //
+                    10 : {LCD_RS, LCD_RW, LCD_DATA} <= 10'b1_0_0010_1000; // (                   
+                    11 :begin case(hour) //시간으로 주/야간 판단
+                            8,9,10,11,12,13,14,15,16,17,18,19,20,21,22: {LCD_RS, LCD_RW, LCD_DATA} <= 10'b1_0_0010_0000; //
+                            23,0,1,2,3,4,5,6,7: {LCD_RS, LCD_RW, LCD_DATA} <= 10'b1_0_0110_1110; // n
+                        endcase
+                        end
+                    12 :begin case(hour) //시간으로 주/야간 판단
+                            8,9,10,11,12,13,14,15,16,17,18,19,20,21,22: {LCD_RS, LCD_RW, LCD_DATA} <= 10'b1_0_0110_0100; // d
+                            23,0,1,2,3,4,5,6,7: {LCD_RS, LCD_RW, LCD_DATA} <= 10'b1_0_0110_1001; // i
+                        endcase
+                        end
+                     13 :begin case(hour) //시간으로 주/야간 판단
+                            8,9,10,11,12,13,14,15,16,17,18,19,20,21,22: {LCD_RS, LCD_RW, LCD_DATA} <= 10'b1_0_0110_0001; // a
+                            23,0,1,2,3,4,5,6,7: {LCD_RS, LCD_RW, LCD_DATA} <= 10'b1_0_0110_0111; // g
+                        endcase
+                        end     
+                     14 :begin case(hour) //시간으로 주/야간 판단
+                            8,9,10,11,12,13,14,15,16,17,18,19,20,21,22: {LCD_RS, LCD_RW, LCD_DATA} <= 10'b1_0_0111_1001; // y
+                            23,0,1,2,3,4,5,6,7: {LCD_RS, LCD_RW, LCD_DATA} <= 10'b1_0_0110_1000; // h
+                        endcase
+                        end    
+                     15 :begin case(hour) //시간으로 주/야간 판단
+                            8,9,10,11,12,13,14,15,16,17,18,19,20,21,22: {LCD_RS, LCD_RW, LCD_DATA} <= 10'b1_0_0010_0000; //
+                            23,0,1,2,3,4,5,6,7: {LCD_RS, LCD_RW, LCD_DATA} <= 10'b1_0_0111_0100; // t
+                        endcase
+                        end 
+                     16 : {LCD_RS, LCD_RW, LCD_DATA} <= 10'b1_0_0010_1001; // )                         
                     default : {LCD_RS, LCD_RW, LCD_DATA} <=10'b1_0_0010_0000; // 
                  endcase
               end
@@ -226,11 +292,20 @@ parameter A1=4'b0000,
 
 integer cnt;
 reg [31:0] hold_t=0;
+reg x=0;
+
 
 always @(posedge clk or posedge rst) begin
-    if(rst) begin
+    if(rst) begin 
         state <= A1;
         cnt <=0;
+        end
+    else if(break_t || x) begin // 신호등 수동조작, 긴급차량 발생, 
+        hold_t<= 150000;
+        if(cnt >= 10000 && x==1) state <= A1; // 1초 흐르고 state A로 전환
+        if(cnt >= 160000) cnt <=0;
+            else cnt <= (x==0)? 0: cnt+1; // cnt 가 처음에 들어올때 0으로 초기화 되어야함. 
+        x <= (cnt >= 160000) ? 0:1;  // 처음에 break_t신호가 들어오면 x=1이 되면서 수동조작 상태가 유지된다. 그러다가 cnt=150000 15초가 지나면, x=0이되면서 수동조작 상태가 꺼지고 주,야간으로 되돌아간다.
         end
     else if(hour >= 8 && hour < 23) begin// 5초 유지시간 주간 case
         hold_t<= 50000;
