@@ -304,7 +304,7 @@ always @(posedge clk or posedge rst) begin
         end
     else if(break_t || x) begin // 신호등 수동조작, 긴급차량 발생, 
         hold_t<= 150000;
-        state <= (cnt >= 160000) ? state3 : ((cnt >= 10000 && x==1) :A1 : state3 ); //1초 흐르고 A1으로 전환, 그리고 STATE가 끝나면 원래 STATE로 돌아감.
+        state <= (cnt >= 160000) ? state3 : ((cnt >= 10000 && x==1) ? A1 : state3 ); //1초 흐르고 A1으로 전환, 그리고 STATE가 끝나면 원래 STATE로 돌아감.
         if(cnt >= 160000)  cnt <=0;
             else cnt <= (x==0)? 0: cnt+1; // cnt 가 처음에 들어올때 0으로 초기화 되어야함. 
         x <= (cnt >= 160000) ? 0:1;  // 처음에 break_t신호가 들어오면 x=1이 되면서 수동조작 상태가 유지된다. 그러다가 cnt=150000 15초가 지나면, x=0이되면서 수동조작 상태가 꺼지고 주,야간으로 되돌아간다.
