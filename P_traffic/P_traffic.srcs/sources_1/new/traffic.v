@@ -387,13 +387,13 @@ always @(posedge clk or posedge rst) begin
     else
         case(state)// 남.북, 서,,동 순서이다.
             A1,A2: begin
-                if(cnt <= (5/6)*hold_t) begin
+                if(cnt <= hold_t/2) begin
                     led_red <=4'b0011;
                     led_green <=4'b1100;
                     led_yellow <=4'b0000;
                     led_left <=4'b0000;   
                   end 
-                 else begin
+                 else if(cnt > hold_t/2) begin
                     led_red <=4'b0011;
                     led_green <=4'b0000;
                     led_yellow <=4'b1100;
@@ -409,13 +409,13 @@ always @(posedge clk or posedge rst) begin
                     end
                  end
              B: begin // 남.북, 서,,동 순서이다.
-                if(cnt <= (5/6)*hold_t) begin
+                if(cnt <= hold_t/2) begin
                     led_red <=4'b1011;
                     led_green <=4'b0100;
                     led_yellow <=4'b0000;
                     led_left <=4'b0100;   
                   end 
-                 else begin
+                 else if(cnt > hold_t/2) begin 
                     led_red <=4'b1011;
                     led_green <=4'b0000;
                     led_yellow <=4'b0100;
@@ -431,13 +431,13 @@ always @(posedge clk or posedge rst) begin
                     end
                  end
              C: begin // 남.북, 서,,동 순서이다.
-                if(cnt <= (5/6)*hold_t) begin
+                if(cnt <= hold_t/2) begin
                     led_red <=4'b0111;
                     led_green <=4'b1000;
                     led_yellow <=4'b0000;
                     led_left <=4'b1000;   
                   end 
-                 else begin
+                 else if(cnt > hold_t/2) begin 
                     led_red <=4'b0111;
                     led_green <=4'b0000;
                     led_yellow <=4'b1000;
@@ -453,13 +453,13 @@ always @(posedge clk or posedge rst) begin
                     end
                  end
               D: begin // 남.북, 서,,동 순서이다.
-                if(cnt <= (5/6)*hold_t) begin
+                if(cnt <= hold_t/2) begin
                     led_red <=4'b0011;
                     led_green <=4'b0000;
                     led_yellow <=4'b0000;
                     led_left <=4'b1100;   
                   end 
-                 else begin
+                 else if(cnt > hold_t/2) begin 
                     led_red <=4'b0011;
                     led_green <=4'b0000;
                     led_yellow <=4'b1100;
@@ -475,13 +475,13 @@ always @(posedge clk or posedge rst) begin
                     end
                  end
               E1,E2: begin // 남.북, 서,,동 순서이다.
-                if(cnt <= (5/6)*hold_t) begin
+                if(cnt <= hold_t/2) begin
                     led_red <=4'b1100;
                     led_green <=4'b0011;
                     led_yellow <=4'b0000;
                     led_left <=4'b0000;   
                   end 
-                 else begin
+                 else if(cnt > hold_t/2) begin 
                     led_red <=4'b1100;
                     led_green <=4'b0000;
                     led_yellow <=4'b0011;
@@ -497,13 +497,13 @@ always @(posedge clk or posedge rst) begin
                     end
                  end
               F: begin // 남.북, 서,,동 순서이다.
-                if(cnt <= (5/6)*hold_t) begin
+                if(cnt <= hold_t/2) begin
                     led_red <=4'b1101;
                     led_green <=4'b0010;
                     led_yellow <=4'b0000;
                     led_left <=4'b0010;   
                   end 
-                 else begin
+                 else if(cnt > hold_t/2) begin 
                     led_red <=4'b1101;
                     led_green <=4'b0000;
                     led_yellow <=4'b0010;
@@ -519,13 +519,13 @@ always @(posedge clk or posedge rst) begin
                     end
                  end
                G: begin // 남.북, 서,,동 순서이다.
-                if(cnt <= (5/6)*hold_t) begin
+                if(cnt <= hold_t/2) begin
                     led_red <=4'b1110;
                     led_green <=4'b0001;
                     led_yellow <=4'b0000;
                     led_left <=4'b0001;   
                   end 
-                 else begin
+                 else if(cnt > hold_t/2) begin 
                     led_red <=4'b1110;
                     led_green <=4'b0000;
                     led_yellow <=4'b0001;
@@ -541,13 +541,13 @@ always @(posedge clk or posedge rst) begin
                     end
                  end 
               H: begin // 남.북, 서,,동 순서이다.
-                if((cnt <= (5/6)*hold_t)) begin
+                if(cnt <= hold_t/2) begin
                     led_red <=4'b1100;
                     led_green <=4'b0000;
                     led_yellow <=4'b0000;
                     led_left <=4'b0011;   
                   end 
-                 else begin
+                 else if(cnt > hold_t/2) begin 
                     led_red <=4'b1100;
                     led_green <=4'b0000;
                     led_yellow <=4'b0011;
