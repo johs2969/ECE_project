@@ -1,5 +1,5 @@
 `timescale 1ns / 1ps
-//10khz ±âÁØ
+//10khz ê¸°ì¤€
 module traffic(rst, clk, hour_up, break,a,b,c, led_red, led_yellow, led_green, led_left, led_walk_red, led_walk_green,LCD_E,LCD_RS,LCD_RW,LCD_DATA );
 
 input clk,rst,hour_up,break,a,b,c;
@@ -23,7 +23,7 @@ parameter A1=4'b0000,
           H=4'b1001;
           
 oneshot_universal #(.width(2)) uut(.clk(clk), .rst(rst), .btn({hour_up, break}), .btn_trig({hour_up_t,break_t}));
- //½Ã°£ °è»ê 10khz±âÁØ ½Ã°£ÀÌ 100¹è ºü¸£°Ô Èå¸¦°ÍÀÓ. ´ë·« 14ºĞÀÌ¸é ÇÏ·ç°¡ µ¹°Ô µÈ´Ù.
+ //ì‹œê°„ ê³„ì‚° 10khzê¸°ì¤€ ì‹œê°„ì´ 100ë°° ë¹ ë¥´ê²Œ íë¥¼ê²ƒì„. ëŒ€ëµ 14ë¶„ì´ë©´ í•˜ë£¨ê°€ ëŒê²Œ ëœë‹¤.
  
  integer d=99;
 always @(posedge clk or posedge rst) begin   
@@ -33,20 +33,21 @@ always @(posedge clk or posedge rst) begin
         sec <=0;
         min <=0;
         end
-    else if(hour_up_t) hour <= hour+1;// ¹öÆ° ´©¸£¸é °­Á¦·Î 1½Ã°£ Áõ°¡. ¿ø¼¦Æ®¸®°Å·Î ÀÛµ¿.
-    else if (cccnt < d)  begin cccnt <= cccnt+1; //1clk¸¶´Ù cccnt Áõ°¡, ½ÇÁ¦1ÃÊ°¡ ³»ºÎ½Ã°è0.01ÃÊÀÎ ¼À. ½ÇÁ¦½Ã°£ÀÇ 100¹è
-            d <= a? 9999 :(b? 999 : (c? 49: 99)); //a=½ÇÁ¦½Ã°£ÀÇ 1¹è, b= ½ÇÁ¦½Ã°£ÀÇ 10¹è, c=½ÇÁ¦½Ã°£ÀÇ 200¹è dip ½ºÀ§Ä¡¸¦ »ç¿ëÇÒ°ÍÀÌ´Ï, ²Ú ´©¸£Áö ¾Ê¾Æµµ µÊ(¹èÀ² À¯Áö°¡´É)
+    else if(hour_up_t && hour < 23) hour <= hour+1;// ë²„íŠ¼ ëˆ„ë¥´ë©´ ê°•ì œë¡œ 1ì‹œê°„ ì¦ê°€. ì›ìƒ·íŠ¸ë¦¬ê±°ë¡œ ì‘ë™.
+    else if(hour_up_t && hour == 23) hour <= 0;// ë²„íŠ¼ ëˆ„ë¥´ë©´ ê°•ì œë¡œ 1ì‹œê°„ ì¦ê°€. ì›ìƒ·íŠ¸ë¦¬ê±°ë¡œ ì‘ë™
+    else if (cccnt < d)  begin cccnt <= cccnt+1; //1clkë§ˆë‹¤ cccnt ì¦ê°€, ì‹¤ì œ1ì´ˆê°€ ë‚´ë¶€ì‹œê³„0.01ì´ˆì¸ ì…ˆ. ì‹¤ì œì‹œê°„ì˜ 100ë°°
+            d <= a? 9999 :(b? 999 : (c? 49: 99)); //a=ì‹¤ì œì‹œê°„ì˜ 1ë°°, b= ì‹¤ì œì‹œê°„ì˜ 10ë°°, c=ì‹¤ì œì‹œê°„ì˜ 200ë°° dip ìŠ¤ìœ„ì¹˜ë¥¼ ì‚¬ìš©í• ê²ƒì´ë‹ˆ, ê¾¹ ëˆ„ë¥´ì§€ ì•Šì•„ë„ ë¨(ë°°ìœ¨ ìœ ì§€ê°€ëŠ¥)
             end
-       else begin //cnt==99. 99¹Ğ¸®ÃÊ->0¹Ğ¸®ÃÊ ³Ñ¾î°¥ ¶§
+       else begin //cnt==99. 99ë°€ë¦¬ì´ˆ->0ë°€ë¦¬ì´ˆ ë„˜ì–´ê°ˆ ë•Œ
            cccnt <= 0;
-         if (sec < 59) sec <= sec+1; //99+1¹Ğ¸®ÃÊ¸¶´Ù ÃÊ ´ÜÀ§ Áõ°¡.
-          else begin //sec==59. 59ÃÊ->0ÃÊ ³Ñ¾î°¥ ¶§
+         if (sec < 59) sec <= sec+1; //99+1ë°€ë¦¬ì´ˆë§ˆë‹¤ ì´ˆ ë‹¨ìœ„ ì¦ê°€.
+          else begin //sec==59. 59ì´ˆ->0ì´ˆ ë„˜ì–´ê°ˆ ë•Œ
            sec <= 0;
-         if (min < 59) min <= min+1; //59+1ÃÊ¸¶´Ù ºĞ ´ÜÀ§ Áõ°¡.
-          else begin //min==59. 59ºĞ->0ºĞ ³Ñ¾î°¥ ¶§
+         if (min < 59) min <= min+1; //59+1ì´ˆë§ˆë‹¤ ë¶„ ë‹¨ìœ„ ì¦ê°€.
+          else begin //min==59. 59ë¶„->0ë¶„ ë„˜ì–´ê°ˆ ë•Œ
            min <= 0;
-          if (hour < 23) hour <= hour+1; //59ºĞ 59+1ÃÊ¸¶´Ù ½Ã°£ ´ÜÀ§ Áõ°¡.
-           else begin //hour==23. 23½Ã->0½Ã ³Ñ¾î°¥ ¶§ 
+          if (hour < 23) hour <= hour+1; //59ë¶„ 59+1ì´ˆë§ˆë‹¤ ì‹œê°„ ë‹¨ìœ„ ì¦ê°€.
+           else begin //hour==23. 23ì‹œ->0ì‹œ ë„˜ì–´ê°ˆ ë•Œ 
             hour <= 0;
             end //hour=23 
          end //min==59
@@ -147,13 +148,13 @@ begin
                     05 : {LCD_RS, LCD_RW, LCD_DATA} <= 10'b1_0_0010_0000; // 
                     06 : {LCD_RS, LCD_RW, LCD_DATA} <= 10'b1_0_0011_1010; // : 
                     07 : {LCD_RS, LCD_RW, LCD_DATA} <= 10'b1_0_0010_0000; //   
-                    08 : begin case(bcd1[7:4]) //10ÀÇ ÀÚ¸´¼ö ÀÔ·Â hour
+                    08 : begin case(bcd1[7:4]) //10ì˜ ìë¦¿ìˆ˜ ì…ë ¥ hour
                             0: {LCD_RS, LCD_RW, LCD_DATA} <= 10'b1_0_0011_0000; // 0
                             1: {LCD_RS, LCD_RW, LCD_DATA} <= 10'b1_0_0011_0001; // 1
                             2: {LCD_RS, LCD_RW, LCD_DATA} <= 10'b1_0_0011_0010; // 2
                         endcase
                         end                  
-                    09 : begin case(bcd1[3:0]) //1ÀÇ ÀÚ¸´¼ö ÀÔ·Â hour
+                    09 : begin case(bcd1[3:0]) //1ì˜ ìë¦¿ìˆ˜ ì…ë ¥ hour
                             0: {LCD_RS, LCD_RW, LCD_DATA} <= 10'b1_0_0011_0000; // 0
                             1: {LCD_RS, LCD_RW, LCD_DATA} <= 10'b1_0_0011_0001; // 1
                             2: {LCD_RS, LCD_RW, LCD_DATA} <= 10'b1_0_0011_0010; // 2
@@ -167,7 +168,7 @@ begin
                         endcase
                         end 
                     10 : {LCD_RS, LCD_RW, LCD_DATA} <= 10'b1_0_0011_1010; // :                    
-                    11 :begin case(bcd2[7:4]) //10ÀÇ ÀÚ¸´¼ö ÀÔ·Â min
+                    11 :begin case(bcd2[7:4]) //10ì˜ ìë¦¿ìˆ˜ ì…ë ¥ min
                             0: {LCD_RS, LCD_RW, LCD_DATA} <= 10'b1_0_0011_0000; // 0
                             1: {LCD_RS, LCD_RW, LCD_DATA} <= 10'b1_0_0011_0001; // 1
                             2: {LCD_RS, LCD_RW, LCD_DATA} <= 10'b1_0_0011_0010; // 2
@@ -176,7 +177,7 @@ begin
                             5: {LCD_RS, LCD_RW, LCD_DATA} <= 10'b1_0_0011_0101; // 5
                         endcase
                         end
-                    12 :begin case(bcd2[3:0]) //1ÀÇ ÀÚ¸´¼ö ÀÔ·Â min
+                    12 :begin case(bcd2[3:0]) //1ì˜ ìë¦¿ìˆ˜ ì…ë ¥ min
                             0: {LCD_RS, LCD_RW, LCD_DATA} <= 10'b1_0_0011_0000; // 0
                             1: {LCD_RS, LCD_RW, LCD_DATA} <= 10'b1_0_0011_0001; // 1
                             2: {LCD_RS, LCD_RW, LCD_DATA} <= 10'b1_0_0011_0010; // 2
@@ -190,7 +191,7 @@ begin
                         endcase
                         end     
                       13 : {LCD_RS, LCD_RW, LCD_DATA} <= 10'b1_0_0011_1010; // :      
-                      14 :begin case(bcd3[7:4]) //1ÀÇ ÀÚ¸´¼ö ÀÔ·Â sec
+                      14 :begin case(bcd3[7:4]) //1ì˜ ìë¦¿ìˆ˜ ì…ë ¥ sec
                             0: {LCD_RS, LCD_RW, LCD_DATA} <= 10'b1_0_0011_0000; // 0
                             1: {LCD_RS, LCD_RW, LCD_DATA} <= 10'b1_0_0011_0001; // 1
                             2: {LCD_RS, LCD_RW, LCD_DATA} <= 10'b1_0_0011_0010; // 2
@@ -199,7 +200,7 @@ begin
                             5: {LCD_RS, LCD_RW, LCD_DATA} <= 10'b1_0_0011_0101; // 5
                         endcase
                         end          
-                      15 :begin case(bcd3[3:0]) //1ÀÇ ÀÚ¸´¼ö ÀÔ·Â sec
+                      15 :begin case(bcd3[3:0]) //1ì˜ ìë¦¿ìˆ˜ ì…ë ¥ sec
                             0: {LCD_RS, LCD_RW, LCD_DATA} <= 10'b1_0_0011_0000; // 0
                             1: {LCD_RS, LCD_RW, LCD_DATA} <= 10'b1_0_0011_0001; // 1
                             2: {LCD_RS, LCD_RW, LCD_DATA} <= 10'b1_0_0011_0010; // 2
@@ -217,7 +218,7 @@ begin
               end
                LINE2 : begin
                 case(ccnt)
-                    00 : {LCD_RS, LCD_RW, LCD_DATA} <=10'b0_0_1000_0000; //    
+                    00 : {LCD_RS, LCD_RW, LCD_DATA} <=10'b0_0_1100_0000; //    
                     01 : {LCD_RS, LCD_RW, LCD_DATA} <= 10'b1_0_0101_0011; // S
                     02 : {LCD_RS, LCD_RW, LCD_DATA} <= 10'b1_0_0111_0100; // t
                     03 : {LCD_RS, LCD_RW, LCD_DATA} <= 10'b1_0_0110_0001; // a
@@ -226,7 +227,7 @@ begin
                     06 : {LCD_RS, LCD_RW, LCD_DATA} <= 10'b1_0_0010_0000; //  
                     07 : {LCD_RS, LCD_RW, LCD_DATA} <= 10'b1_0_0011_1010; // :  
                     08 : {LCD_RS, LCD_RW, LCD_DATA} <= 10'b1_0_0010_0000; //  
-                    09 : begin case(state) // stateÀÔ·Â
+                    09 : begin case(state) // stateì…ë ¥
                            A1,A2: {LCD_RS, LCD_RW, LCD_DATA} <= 10'b1_0_0100_0001; // A
                             B: {LCD_RS, LCD_RW, LCD_DATA} <= 10'b1_0_0100_0010; // B
                             C: {LCD_RS, LCD_RW, LCD_DATA} <= 10'b1_0_0100_0011; // C
@@ -238,27 +239,27 @@ begin
                         endcase
                         end                  
                     10 : {LCD_RS, LCD_RW, LCD_DATA} <= 10'b1_0_0010_1000; // (                   
-                    11 :begin case(hour) //½Ã°£À¸·Î ÁÖ/¾ß°£ ÆÇ´Ü
+                    11 :begin case(hour) //ì‹œê°„ìœ¼ë¡œ ì£¼/ì•¼ê°„ íŒë‹¨
                             8,9,10,11,12,13,14,15,16,17,18,19,20,21,22: {LCD_RS, LCD_RW, LCD_DATA} <= 10'b1_0_0010_0000; //
                             23,0,1,2,3,4,5,6,7: {LCD_RS, LCD_RW, LCD_DATA} <= 10'b1_0_0110_1110; // n
                         endcase
                         end
-                    12 :begin case(hour) //½Ã°£À¸·Î ÁÖ/¾ß°£ ÆÇ´Ü
+                    12 :begin case(hour) //ì‹œê°„ìœ¼ë¡œ ì£¼/ì•¼ê°„ íŒë‹¨
                             8,9,10,11,12,13,14,15,16,17,18,19,20,21,22: {LCD_RS, LCD_RW, LCD_DATA} <= 10'b1_0_0110_0100; // d
                             23,0,1,2,3,4,5,6,7: {LCD_RS, LCD_RW, LCD_DATA} <= 10'b1_0_0110_1001; // i
                         endcase
                         end
-                     13 :begin case(hour) //½Ã°£À¸·Î ÁÖ/¾ß°£ ÆÇ´Ü
+                     13 :begin case(hour) //ì‹œê°„ìœ¼ë¡œ ì£¼/ì•¼ê°„ íŒë‹¨
                             8,9,10,11,12,13,14,15,16,17,18,19,20,21,22: {LCD_RS, LCD_RW, LCD_DATA} <= 10'b1_0_0110_0001; // a
                             23,0,1,2,3,4,5,6,7: {LCD_RS, LCD_RW, LCD_DATA} <= 10'b1_0_0110_0111; // g
                         endcase
                         end     
-                     14 :begin case(hour) //½Ã°£À¸·Î ÁÖ/¾ß°£ ÆÇ´Ü
+                     14 :begin case(hour) //ì‹œê°„ìœ¼ë¡œ ì£¼/ì•¼ê°„ íŒë‹¨
                             8,9,10,11,12,13,14,15,16,17,18,19,20,21,22: {LCD_RS, LCD_RW, LCD_DATA} <= 10'b1_0_0111_1001; // y
                             23,0,1,2,3,4,5,6,7: {LCD_RS, LCD_RW, LCD_DATA} <= 10'b1_0_0110_1000; // h
                         endcase
                         end    
-                     15 :begin case(hour) //½Ã°£À¸·Î ÁÖ/¾ß°£ ÆÇ´Ü
+                     15 :begin case(hour) //ì‹œê°„ìœ¼ë¡œ ì£¼/ì•¼ê°„ íŒë‹¨
                             8,9,10,11,12,13,14,15,16,17,18,19,20,21,22: {LCD_RS, LCD_RW, LCD_DATA} <= 10'b1_0_0010_0000; //
                             23,0,1,2,3,4,5,6,7: {LCD_RS, LCD_RW, LCD_DATA} <= 10'b1_0_0111_0100; // t
                         endcase
@@ -277,7 +278,7 @@ begin
   
   assign LCD_E = clk;               
 
-// Á¡¸ê½ÅÈ£ 10khz ±âÁØÀ¸·Î 0.5ÃÊ¸¶´Ù flicker°¡ ¹Ù²î¸ç Á¡¸êÇÑ´Ù.
+// ì ë©¸ì‹ í˜¸ 10khz ê¸°ì¤€ìœ¼ë¡œ 0.5ì´ˆë§ˆë‹¤ flickerê°€ ë°”ë€Œë©° ì ë©¸í•œë‹¤.
 
 always @(posedge clk or posedge rst) begin
     if(rst) 
@@ -290,7 +291,7 @@ end
 
 assign clk_flicker = (cnt_1h >=4999) ? 0:1;            
 
-// state º¯°æ 
+// state ë³€ê²½ 
 
 integer cnt;
 reg [31:0] hold_t=0;
@@ -302,14 +303,14 @@ always @(posedge clk or posedge rst) begin
         state <= A1;
         cnt <=0;
         end
-    else if(break_t || x) begin // ½ÅÈ£µî ¼öµ¿Á¶ÀÛ, ±ä±ŞÂ÷·® ¹ß»ı, 
+    else if(break_t || x) begin // ì‹ í˜¸ë“± ìˆ˜ë™ì¡°ì‘, ê¸´ê¸‰ì°¨ëŸ‰ ë°œìƒ, 
         hold_t<= 150000;
-        state <= (cnt >= 160000) ? state3 : ((cnt >= 10000 && x==1) ? A1 : state3 ); //1ÃÊ Èå¸£°í A1À¸·Î ÀüÈ¯, ±×¸®°í STATE°¡ ³¡³ª¸é ¿ø·¡ STATE·Î µ¹¾Æ°¨.
+        state <= (cnt >= 160000) ? state3 : ((cnt >= 10000 && x==1) ? A1 : state3 ); //1ì´ˆ íë¥´ê³  A1ìœ¼ë¡œ ì „í™˜, ê·¸ë¦¬ê³  STATEê°€ ëë‚˜ë©´ ì›ë˜ STATEë¡œ ëŒì•„ê°.
         if(cnt >= 160000)  cnt <=0;
-            else cnt <= (x==0)? 0: cnt+1; // cnt °¡ Ã³À½¿¡ µé¾î¿Ã¶§ 0À¸·Î ÃÊ±âÈ­ µÇ¾î¾ßÇÔ. 
-        x <= (cnt >= 160000) ? 0:1;  // Ã³À½¿¡ break_t½ÅÈ£°¡ µé¾î¿À¸é x=1ÀÌ µÇ¸é¼­ ¼öµ¿Á¶ÀÛ »óÅÂ°¡ À¯ÁöµÈ´Ù. ±×·¯´Ù°¡ cnt=150000 15ÃÊ°¡ Áö³ª¸é, x=0ÀÌµÇ¸é¼­ ¼öµ¿Á¶ÀÛ »óÅÂ°¡ ²¨Áö°í ÁÖ,¾ß°£À¸·Î µÇµ¹¾Æ°£´Ù.
+            else cnt <= (x==0)? 0: cnt+1; // cnt ê°€ ì²˜ìŒì— ë“¤ì–´ì˜¬ë•Œ 0ìœ¼ë¡œ ì´ˆê¸°í™” ë˜ì–´ì•¼í•¨. 
+        x <= (cnt >= 160000) ? 0:1;  // ì²˜ìŒì— break_tì‹ í˜¸ê°€ ë“¤ì–´ì˜¤ë©´ x=1ì´ ë˜ë©´ì„œ ìˆ˜ë™ì¡°ì‘ ìƒíƒœê°€ ìœ ì§€ëœë‹¤. ê·¸ëŸ¬ë‹¤ê°€ cnt=150000 15ì´ˆê°€ ì§€ë‚˜ë©´, x=0ì´ë˜ë©´ì„œ ìˆ˜ë™ì¡°ì‘ ìƒíƒœê°€ êº¼ì§€ê³  ì£¼,ì•¼ê°„ìœ¼ë¡œ ë˜ëŒì•„ê°„ë‹¤.
         end
-    else if(hour >= 8 && hour < 23) begin// 5ÃÊ À¯Áö½Ã°£ ÁÖ°£ case
+    else if(hour >= 8 && hour < 23) begin// 5ì´ˆ ìœ ì§€ì‹œê°„ ì£¼ê°„ case
         hold_t<= 50000;
         state3 <=state;
         case(state)
@@ -340,7 +341,7 @@ always @(posedge clk or posedge rst) begin
             default: state <= A1;
        endcase
      end  
-    else if(hour < 8 || hour == 23) begin // 10ÃÊ À¯Áö½Ã°£À¸·Î º¯°æÇØÁØ´Ù ¾ß°£ case    
+    else if(hour < 8 || hour == 23) begin // 10ì´ˆ ìœ ì§€ì‹œê°„ìœ¼ë¡œ ë³€ê²½í•´ì¤€ë‹¤ ì•¼ê°„ case    
          hold_t<= 100000;
          state3 <=state;
        case(state)
@@ -373,7 +374,7 @@ always @(posedge clk or posedge rst) begin
       end
 end 
 
-// stateº° ½ÅÈ£µî 
+// stateë³„ ì‹ í˜¸ë“± 
 
 always @(posedge clk or posedge rst) begin
     if(rst) begin
@@ -384,7 +385,7 @@ always @(posedge clk or posedge rst) begin
         led_walk_green <=4'b0000;
         end
     else
-        case(state)// ³².ºÏ, ¼­,,µ¿ ¼ø¼­ÀÌ´Ù.
+        case(state)// ë‚¨.ë¶, ì„œ,,ë™ ìˆœì„œì´ë‹¤.
             A1,A2: begin
                 if(cnt <= (5/6)*hold_t) begin
                     led_red <=4'b0011;
@@ -407,7 +408,7 @@ always @(posedge clk or posedge rst) begin
                     led_walk_green <={2'b00,~clk_flicker,~clk_flicker}; 
                     end
                  end
-             B: begin // ³².ºÏ, ¼­,,µ¿ ¼ø¼­ÀÌ´Ù.
+             B: begin // ë‚¨.ë¶, ì„œ,,ë™ ìˆœì„œì´ë‹¤.
                 if(cnt <= (5/6)*hold_t) begin
                     led_red <=4'b1011;
                     led_green <=4'b0100;
@@ -429,7 +430,7 @@ always @(posedge clk or posedge rst) begin
                     led_walk_green <={3'b00,~clk_flicker}; 
                     end
                  end
-             C: begin // ³².ºÏ, ¼­,,µ¿ ¼ø¼­ÀÌ´Ù.
+             C: begin // ë‚¨.ë¶, ì„œ,,ë™ ìˆœì„œì´ë‹¤.
                 if(cnt <= (5/6)*hold_t) begin
                     led_red <=4'b0111;
                     led_green <=4'b1000;
@@ -451,7 +452,7 @@ always @(posedge clk or posedge rst) begin
                     led_walk_green <={2'b00,~clk_flicker,1'b0}; 
                     end
                  end
-              D: begin // ³².ºÏ, ¼­,,µ¿ ¼ø¼­ÀÌ´Ù.
+              D: begin // ë‚¨.ë¶, ì„œ,,ë™ ìˆœì„œì´ë‹¤.
                 if(cnt <= (5/6)*hold_t) begin
                     led_red <=4'b0011;
                     led_green <=4'b0000;
@@ -473,7 +474,7 @@ always @(posedge clk or posedge rst) begin
                     led_walk_green <=4'b0000;
                     end
                  end
-              E1,E2: begin // ³².ºÏ, ¼­,,µ¿ ¼ø¼­ÀÌ´Ù.
+              E1,E2: begin // ë‚¨.ë¶, ì„œ,,ë™ ìˆœì„œì´ë‹¤.
                 if(cnt <= (5/6)*hold_t) begin
                     led_red <=4'b1100;
                     led_green <=4'b0011;
@@ -495,7 +496,7 @@ always @(posedge clk or posedge rst) begin
                     led_walk_green <={~clk_flicker,~clk_flicker,2'b0}; 
                     end
                  end
-              F: begin // ³².ºÏ, ¼­,,µ¿ ¼ø¼­ÀÌ´Ù.
+              F: begin // ë‚¨.ë¶, ì„œ,,ë™ ìˆœì„œì´ë‹¤.
                 if(cnt <= (5/6)*hold_t) begin
                     led_red <=4'b1101;
                     led_green <=4'b0010;
@@ -517,7 +518,7 @@ always @(posedge clk or posedge rst) begin
                     led_walk_green <={1'b0,~clk_flicker,2'b00};
                     end
                  end
-               G: begin // ³².ºÏ, ¼­,,µ¿ ¼ø¼­ÀÌ´Ù.
+               G: begin // ë‚¨.ë¶, ì„œ,,ë™ ìˆœì„œì´ë‹¤.
                 if(cnt <= (5/6)*hold_t) begin
                     led_red <=4'b1110;
                     led_green <=4'b0001;
@@ -539,7 +540,7 @@ always @(posedge clk or posedge rst) begin
                     led_walk_green <={~clk_flicker,3'b000};
                     end
                  end 
-              H: begin // ³².ºÏ, ¼­,,µ¿ ¼ø¼­ÀÌ´Ù.
+              H: begin // ë‚¨.ë¶, ì„œ,,ë™ ìˆœì„œì´ë‹¤.
                 if((cnt <= (5/6)*hold_t)) begin
                     led_red <=4'b1100;
                     led_green <=4'b0000;
